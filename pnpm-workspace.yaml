@@ -1,0 +1,11 @@
+allowBuilds:
+  sharp: false
+  unrs-resolver: false
+
+# eslint-config-next pulls in eslint-plugin-react/import/jsx-a11y, whose latest
+# releases still declare eslint <=9 as a peer. They run fine on eslint 10.
+peerDependencyRules:
+  allowedVersions:
+    eslint-plugin-react>eslint: '10'
+    eslint-plugin-import>eslint: '10'
+    eslint-plugin-jsx-a11y>eslint: '10'
