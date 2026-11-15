@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPlayerSession, leaveRoom } from '../utils/playerSession';
+import HostRestartButton from './HostRestartButton';
 import styles from './VotingScreen.module.css';
 
 interface VotingScreenProps {
@@ -170,6 +171,8 @@ export default function VotingScreen({ roomId }: VotingScreenProps) {
             </div>
           </div>
         )}
+
+        <HostRestartButton />
 
         <button onClick={handleLeave} className={styles.leaveButton}>
           Leave Game

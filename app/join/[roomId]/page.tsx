@@ -43,13 +43,17 @@ export default function JoinPage({params}: { params: Promise<{ roomId: string }>
               setCheckingSession(false);
               return;
             }
-          }
 
-          // Session is invalid - clear it
-          clearPlayerSession();
+            // Player is no longer in the room
+            clearPlayerSession();
+          } else if (response.status === 404) {
+            // Room no longer exists
+            clearPlayerSession();
+          }
         } catch (err) {
+          // Network error or a request aborted by a reload: keep the session,
+          // it is still valid as far as we know.
           console.error('Failed to validate session:', err);
-          clearPlayerSession();
         }
       }
 

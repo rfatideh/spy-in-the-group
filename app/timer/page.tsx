@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPlayerSession, leaveRoom } from '../utils/playerSession';
 import { useGamePhaseRedirect } from '../utils/gameRoute';
+import HostRestartButton from '../components/HostRestartButton';
 import styles from './TimerPage.module.css';
 
 export default function TimerPage() {
@@ -176,6 +177,8 @@ export default function TimerPage() {
             <p>Waiting for host to start voting...</p>
           </div>
         )}
+
+        <HostRestartButton />
 
         <button onClick={handleLeaveGame} className={styles.leaveButton}>
           Leave Game

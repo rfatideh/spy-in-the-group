@@ -50,6 +50,26 @@ export async function leaveRoom(): Promise<void> {
   clearPlayerSession();
 }
 
+// Host only: resets the room to the lobby with the same players. Other players
+// follow automatically through useGamePhaseRedirect. Returns the lobby URL.
+export async function restartGame(): Promise<string> {
+  const session = getPlayerSession();
+  if (!session?.isHost) {
+    throw new Error('Only the host can restart the game');
+  }
+
+  const response = await fetch(`/api/rooms/${session.roomId}/restart`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({playerId: session.playerId}),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to restart game');
+  }
+  return `/join/${session.roomId}`;
+}
+
 export function isHost(): boolean {
   const session = getPlayerSession();
   return session?.isHost ?? false;

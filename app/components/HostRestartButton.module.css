@@ -1,0 +1,72 @@
+.restartButton {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.restartButton:hover {
+  background: #667eea;
+  color: white;
+}
+
+.confirmPanel {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  border: 2px solid #667eea;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.confirmText {
+  margin: 0 0 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.error {
+  margin: 0 0 1rem;
+  color: #ff4757;
+  font-size: 0.9rem;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  padding: 0.9rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancelButton {
+  background: white;
+  color: #666;
+  border: 2px solid #ccc;
+}
+
+.confirmButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.cancelButton:disabled,
+.confirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

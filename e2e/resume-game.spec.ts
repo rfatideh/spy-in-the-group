@@ -1,36 +1,10 @@
-import {Browser, expect, Page} from '@playwright/test';
-import {test} from '@playwright/test';
-import {clearSession, waitForPolling} from './test-helpers';
+import {expect, test} from '@playwright/test';
+import {setUpMultiDeviceRoom, waitForPolling} from './test-helpers';
 import {POLLING_TIMEOUT} from './fixtures';
-
-// Creates a multi-device room with a host and two players, all in the lobby.
-async function setUpRoom(browser: Browser) {
-  const contexts = await Promise.all([0, 1, 2].map(() => browser.newContext()));
-  const [hostPage, player1Page, player2Page] = await Promise.all(contexts.map(c => c.newPage()));
-  for (const page of [hostPage, player1Page, player2Page]) {
-    await clearSession(page);
-  }
-
-  await hostPage.goto('/');
-  await hostPage.getByRole('button', {name: /multi device/i}).click();
-  await hostPage.getByPlaceholder(/name/i).fill('Host');
-  await hostPage.getByRole('button', {name: /create room/i}).click();
-  await expect(hostPage.getByText('Game Lobby')).toBeVisible({timeout: POLLING_TIMEOUT});
-  const roomId = hostPage.url().match(/join\/([a-zA-Z0-9]+)/)![1];
-
-  for (const [page, name] of [[player1Page, 'Player1'], [player2Page, 'Player2']] as [Page, string][]) {
-    await page.goto(`/join/${roomId}`);
-    await page.getByPlaceholder(/name/i).fill(name);
-    await page.getByRole('button', {name: /join/i}).click();
-    await expect(page.getByText('Game Lobby')).toBeVisible({timeout: POLLING_TIMEOUT});
-  }
-
-  return {contexts, hostPage, player1Page, player2Page, roomId};
-}
 
 test.describe('Resuming a multi-device game after closing the browser', () => {
   test('host reopening the home page returns to the lobby', async ({browser}) => {
-    const {contexts, hostPage, roomId} = await setUpRoom(browser);
+    const {contexts, hostPage, roomId} = await setUpMultiDeviceRoom(browser);
     try {
       await hostPage.close();
       const reopened = await contexts[0].newPage();
@@ -44,7 +18,7 @@ test.describe('Resuming a multi-device game after closing the browser', () => {
   });
 
   test('players who missed several phases land on the current phase', async ({browser}) => {
-    const {contexts, hostPage, player1Page, player2Page} = await setUpRoom(browser);
+    const {contexts, hostPage, player1Page, player2Page} = await setUpMultiDeviceRoom(browser);
     try {
       await waitForPolling(hostPage, 1);
       await hostPage.getByRole('button', {name: /start game/i}).click();

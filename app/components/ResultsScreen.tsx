@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPlayerSession, leaveRoom } from '../utils/playerSession';
+import { getPlayerSession, leaveRoom, restartGame } from '../utils/playerSession';
 import { Language, Word, PlayerVote } from '../types/game';
 import styles from './ResultsScreen.module.css';
 
@@ -95,32 +95,11 @@ export default function ResultsScreen({ roomId }: ResultsScreenProps) {
   };
 
   const handleRestart = async () => {
-    const session = getPlayerSession();
-    if (!session || !session.isHost) {
-      return;
-    }
-
     setRestarting(true);
 
     try {
-      const response = await fetch(`/api/rooms/${roomId}/restart`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerId: session.playerId,
-        }),
-      });
-
-      if (response.ok) {
-        // Redirect to lobby - other players will be redirected via polling
-        router.push(`/join/${roomId}`);
-      } else {
-        const data = await response.json();
-        console.error('Failed to restart game:', data.error);
-        setRestarting(false);
-      }
+      // Other players are moved to the lobby by useGamePhaseRedirect
+      router.push(await restartGame());
     } catch (err) {
       console.error('Failed to restart game:', err);
       setRestarting(false);
