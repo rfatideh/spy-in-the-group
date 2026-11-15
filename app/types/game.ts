@@ -130,5 +130,6 @@ export interface Room {
   playerRoles?: PlayerRole[];
   votes?: PlayerVote[];
   gameStartTime?: number | null;
-  createdAt: number;
+  // Must be a Date: the TTL index on rooms.createdAt ignores numeric values.
+  createdAt: Date;
 }

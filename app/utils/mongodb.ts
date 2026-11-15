@@ -2,14 +2,21 @@ import {Db, MongoClient} from 'mongodb';
 import {attachDatabasePool} from '@vercel/functions';
 
 let client: MongoClient | null = null;
-let db: Db | null = null;
+let dbPromise: Promise<Db> | null = null;
 
-export async function connectToDatabase(): Promise<Db> {
-  // Return existing connection if available
-  if (db) {
-    return db;
+export function connectToDatabase(): Promise<Db> {
+  // Share one in-flight connection so concurrent cold-start requests don't
+  // each open their own client. Reset on failure so the next call retries.
+  if (!dbPromise) {
+    dbPromise = connect().catch((error) => {
+      dbPromise = null;
+      throw error;
+    });
   }
+  return dbPromise;
+}
 
+async function connect(): Promise<Db> {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
     throw new Error('MONGODB_URI environment variable is not defined');
@@ -25,13 +32,12 @@ export async function connectToDatabase(): Promise<Db> {
     await client.connect();
 
     // Get database
-    db = client.db();
+    const db = client.db();
 
     console.log('✅ Connected to MongoDB');
 
     // Create indexes
     await createIndexes(db);
-
 
     return db;
   } catch (error) {
@@ -68,7 +74,7 @@ export async function disconnectFromDatabase() {
   if (client) {
     await client.close();
     client = null;
-    db = null;
+    dbPromise = null;
     console.log('✅ Disconnected from MongoDB');
   }
 }

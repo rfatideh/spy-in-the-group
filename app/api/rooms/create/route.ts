@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       players: [hostName], // Host is the first player
       settings,
       status: 'waiting',
-      createdAt: Date.now(),
+      createdAt: new Date(),
     };
 
     await createRoom(room);
