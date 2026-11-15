@@ -25,7 +25,9 @@ export async function updateRoom(id: string, updates: Partial<Room>): Promise<bo
   return result.matchedCount > 0;
 }
 
-export async function addPlayerToRoom(roomId: string, playerName: string): Promise<boolean> {
+export type JoinResult = 'joined' | 'name_taken' | 'unavailable';
+
+export async function addPlayerToRoom(roomId: string, playerName: string): Promise<JoinResult> {
   const db = await connectToDatabase();
 
   // Atomically add player only if room is waiting and player not already in list
@@ -38,19 +40,24 @@ export async function addPlayerToRoom(roomId: string, playerName: string): Promi
     {$push: {players: playerName} as any}
   );
 
-  // If no modification, check if player already exists
-  if (result.modifiedCount === 0) {
-    const room = await getRoom(roomId);
-    return room?.players.includes(playerName) || false;
+  if (result.modifiedCount > 0) {
+    return 'joined';
   }
 
-  return true;
+  // Players are identified by name, so a second device using a taken name
+  // would share that player's role and vote. Reject it instead.
+  const room = await getRoom(roomId);
+  return room?.status === 'waiting' && room.players.includes(playerName)
+    ? 'name_taken'
+    : 'unavailable';
 }
 
 export async function removePlayerFromRoom(roomId: string, playerName: string): Promise<boolean> {
   const db = await connectToDatabase();
+  // Only before the game starts (roles and votes reference player names), and
+  // never the host, who is always players[0].
   const result = await db.collection('rooms').updateOne(
-    {id: roomId},
+    {id: roomId, status: 'waiting', 'players.0': {$ne: playerName}},
     {$pull: {players: playerName} as any}
   );
   return result.modifiedCount > 0;

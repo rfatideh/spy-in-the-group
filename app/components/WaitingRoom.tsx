@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPlayerSession, clearPlayerSession } from '../utils/playerSession';
+import { getPlayerSession, leaveRoom } from '../utils/playerSession';
 import styles from './WaitingRoom.module.css';
 
 export default function WaitingRoom() {
@@ -53,8 +53,8 @@ export default function WaitingRoom() {
     return () => clearInterval(interval);
   }, [roomId, router]);
 
-  const handleLeave = () => {
-    clearPlayerSession();
+  const handleLeave = async () => {
+    await leaveRoom();
     router.push('/');
   };
 

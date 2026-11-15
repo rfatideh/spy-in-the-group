@@ -3,7 +3,7 @@
 import {use, useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {QRCodeSVG} from 'qrcode.react';
-import {clearPlayerSession, getPlayerSession, savePlayerSession} from '../../utils/playerSession';
+import {clearPlayerSession, getPlayerSession, leaveRoom, savePlayerSession} from '../../utils/playerSession';
 import styles from './JoinPage.module.css';
 
 export default function JoinPage({params}: { params: Promise<{ roomId: string }> }) {
@@ -73,6 +73,12 @@ export default function JoinPage({params}: { params: Promise<{ roomId: string }>
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({playerName: playerName.trim()}),
       });
+
+      if (response.status === 409) {
+        setError('That name is already taken in this room. Please choose another one.');
+        setLoading(false);
+        return;
+      }
 
       if (!response.ok) {
         throw new Error('Failed to join room');
@@ -150,8 +156,8 @@ export default function JoinPage({params}: { params: Promise<{ roomId: string }>
     }
   };
 
-  const handleLeave = () => {
-    clearPlayerSession();
+  const handleLeave = async () => {
+    await leaveRoom();
     router.push('/');
   };
 

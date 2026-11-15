@@ -32,6 +32,24 @@ export function clearPlayerSession(): void {
   }
 }
 
+// Leaves the lobby: frees the player's name on the server, then clears the
+// local session. Failures are ignored so the player can always leave.
+export async function leaveRoom(): Promise<void> {
+  const session = getPlayerSession();
+  if (session && !session.isHost) {
+    try {
+      await fetch(`/api/rooms/${session.roomId}/leave`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({playerName: session.playerName}),
+      });
+    } catch (err) {
+      console.error('Failed to leave room:', err);
+    }
+  }
+  clearPlayerSession();
+}
+
 export function isHost(): boolean {
   const session = getPlayerSession();
   return session?.isHost ?? false;

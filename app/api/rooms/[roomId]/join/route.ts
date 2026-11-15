@@ -17,9 +17,16 @@ export async function POST(
       );
     }
 
-    const success = await addPlayerToRoom(roomId, playerName);
+    const result = await addPlayerToRoom(roomId, playerName);
 
-    if (!success) {
+    if (result === 'name_taken') {
+      return NextResponse.json(
+        { error: 'That name is already taken in this room' },
+        { status: 409 }
+      );
+    }
+
+    if (result !== 'joined') {
       return NextResponse.json(
         { error: 'Failed to join room' },
         { status: 400 }
