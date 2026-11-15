@@ -262,3 +262,22 @@
     font-size: 0.95rem;
   }
 }
+
+.leaveButton {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: white;
+  color: #ff4757;
+  border: 2px solid #ff4757;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.leaveButton:hover {
+  background: #ff4757;
+  color: white;
+}

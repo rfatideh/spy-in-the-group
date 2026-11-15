@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getPlayerSession } from '../utils/playerSession';
 import ResultsScreen from '../components/ResultsScreen';
+import { useGamePhaseRedirect } from '../utils/gameRoute';
 
 export default function ResultsPage() {
   const router = useRouter();
+  useGamePhaseRedirect();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 

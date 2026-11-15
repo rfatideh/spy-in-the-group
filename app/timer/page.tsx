@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPlayerSession, clearPlayerSession } from '../utils/playerSession';
+import { getPlayerSession, leaveRoom } from '../utils/playerSession';
+import { useGamePhaseRedirect } from '../utils/gameRoute';
 import styles from './TimerPage.module.css';
 
 export default function TimerPage() {
@@ -28,25 +29,10 @@ export default function TimerPage() {
 
     // Fetch room data to get game start time and duration
     fetchRoomData(session.roomId);
-
-    // Poll for game phase changes
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/rooms/${session.roomId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.room.gamePhase === 'voting') {
-            // Voting started, redirect to voting page
-            router.push('/vote');
-          }
-        }
-      } catch (err) {
-        console.error('Failed to check game phase:', err);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
   }, [router]);
+
+  // Moves everyone to voting once the host starts it
+  useGamePhaseRedirect();
 
   const fetchRoomData = async (roomId: string) => {
     try {
@@ -124,8 +110,8 @@ export default function TimerPage() {
     }
   };
 
-  const handleLeaveGame = () => {
-    clearPlayerSession();
+  const handleLeaveGame = async () => {
+    await leaveRoom();
     router.push('/');
   };
 

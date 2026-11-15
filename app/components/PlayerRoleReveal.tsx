@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPlayerSession } from '../utils/playerSession';
+import { getPlayerSession, leaveRoom } from '../utils/playerSession';
 import { Word, Language } from '../types/game';
 import styles from './PlayerRoleReveal.module.css';
 
@@ -31,27 +31,13 @@ export default function PlayerRoleReveal({ roomId, language }: PlayerRoleRevealP
     fetchPlayerRole();
   }, []);
 
-  useEffect(() => {
-    if (!roleData || roleData.hasConfirmed) {
-      // Poll for game phase changes
-      const interval = setInterval(async () => {
-        try {
-          const response = await fetch(`/api/rooms/${roomId}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.room.gamePhase === 'timer') {
-              // All players confirmed, move to timer view
-              router.push('/timer');
-            }
-          }
-        } catch (err) {
-          console.error('Failed to check game phase:', err);
-        }
-      }, 2000);
+  // Moving on to the timer once everyone confirms is handled by the page's
+  // useGamePhaseRedirect.
 
-      return () => clearInterval(interval);
-    }
-  }, [roleData, roomId, router]);
+  const handleLeave = async () => {
+    await leaveRoom();
+    router.push('/');
+  };
 
   const fetchPlayerRole = async () => {
     try {
@@ -125,6 +111,9 @@ export default function PlayerRoleReveal({ roomId, language }: PlayerRoleRevealP
       <div className={styles.container}>
         <div className={styles.content}>
           <div className={styles.error}>{error || 'Failed to load role'}</div>
+          <button onClick={handleLeave} className={styles.leaveButton}>
+            Leave Game
+          </button>
         </div>
       </div>
     );
@@ -183,6 +172,10 @@ export default function PlayerRoleReveal({ roomId, language }: PlayerRoleRevealP
             </p>
           </div>
         )}
+
+        <button onClick={handleLeave} className={styles.leaveButton}>
+          Leave Game
+        </button>
       </div>
     </div>
   );

@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { getPlayerSession } from '../utils/playerSession';
 import PlayerRoleReveal from '../components/PlayerRoleReveal';
 import { Language } from '../types/game';
+import { useGamePhaseRedirect } from '../utils/gameRoute';
 
 export default function RoleRevealPage() {
   const router = useRouter();
+  useGamePhaseRedirect();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>('en');
   const [loading, setLoading] = useState(true);

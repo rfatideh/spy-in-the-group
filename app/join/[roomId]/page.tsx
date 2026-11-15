@@ -4,6 +4,7 @@ import {use, useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {QRCodeSVG} from 'qrcode.react';
 import {clearPlayerSession, getPlayerSession, leaveRoom, savePlayerSession} from '../../utils/playerSession';
+import {useGamePhaseRedirect} from '../../utils/gameRoute';
 import styles from './JoinPage.module.css';
 
 export default function JoinPage({params}: { params: Promise<{ roomId: string }> }) {
@@ -120,12 +121,6 @@ export default function JoinPage({params}: { params: Promise<{ roomId: string }>
           const room = data.room;
 
           setPlayers(room.players);
-
-          // Check if game has started
-          if (room.status === 'playing' && room.gamePhase === 'revealing') {
-            clearInterval(interval);
-            router.push('/role-reveal');
-          }
         } else if (response.status === 404) {
           setError('Room not found or has been closed');
           clearInterval(interval);
@@ -136,7 +131,11 @@ export default function JoinPage({params}: { params: Promise<{ roomId: string }>
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [inLobby, roomId, router]);
+  }, [inLobby, roomId]);
+
+  // Once in this room's lobby, follow the room to whatever phase it is in
+  // (game started, or the player reopened this page mid-game).
+  useGamePhaseRedirect(inLobby);
 
   const handleStartGame = async () => {
     try {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPlayerSession, clearPlayerSession } from '../utils/playerSession';
+import { getPlayerSession, leaveRoom } from '../utils/playerSession';
 import { Language, Word, PlayerVote } from '../types/game';
 import styles from './ResultsScreen.module.css';
 
@@ -86,31 +86,11 @@ export default function ResultsScreen({ roomId }: ResultsScreenProps) {
     }
   }, []);
 
-  // Poll for game phase changes (host restarting)
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/rooms/${roomId}`);
-        if (response.ok) {
-          const data = await response.json();
-          const room = data.room;
+  // Returning to the lobby when the host restarts is handled by the page's
+  // useGamePhaseRedirect.
 
-          // If room goes back to waiting, redirect to lobby
-          if (room.gamePhase === 'waiting') {
-            clearInterval(interval);
-            router.push(`/join/${roomId}`);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to check room status:', err);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [roomId, router]);
-
-  const handlePlayAgain = () => {
-    clearPlayerSession();
+  const handlePlayAgain = async () => {
+    await leaveRoom();
     router.push('/');
   };
 

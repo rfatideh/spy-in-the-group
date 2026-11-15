@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getPlayerSession } from '../utils/playerSession';
+import { getPlayerSession, leaveRoom } from '../utils/playerSession';
 import styles from './VotingScreen.module.css';
 
 interface VotingScreenProps {
@@ -30,27 +30,13 @@ export default function VotingScreen({ roomId }: VotingScreenProps) {
     fetchRoomData();
   }, [router]);
 
-  useEffect(() => {
-    if (!hasVoted) return;
+  // Moving on to results once everyone votes is handled by the page's
+  // useGamePhaseRedirect.
 
-    // Poll for game phase changes
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/rooms/${roomId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.room.gamePhase === 'results') {
-            // All players voted, move to results
-            router.push('/results');
-          }
-        }
-      } catch (err) {
-        console.error('Failed to check game phase:', err);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [hasVoted, roomId, router]);
+  const handleLeave = async () => {
+    await leaveRoom();
+    router.push('/');
+  };
 
   const fetchRoomData = async () => {
     try {
@@ -184,6 +170,10 @@ export default function VotingScreen({ roomId }: VotingScreenProps) {
             </div>
           </div>
         )}
+
+        <button onClick={handleLeave} className={styles.leaveButton}>
+          Leave Game
+        </button>
       </div>
     </div>
   );
